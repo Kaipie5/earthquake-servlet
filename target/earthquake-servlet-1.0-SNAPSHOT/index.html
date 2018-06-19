@@ -2,9 +2,45 @@
 <html>
     <head>
         <title>Start Page</title>
+        <!-- JQuery -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <!-- development version, includes helpful console warnings -->
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     </head>
     <body>
         <h1>Hello World!</h1>
+        
+        <div id="app">
+            {{message}}
+            <div>{{ earthquakes }}</div>
+        </div>
+
+        <script>
+            var app_spec = {
+                el : "#app",
+                data : {
+                    message : 'EARTHQUAKES!',
+                    earthquakes : null
+//                    name : null,
+//                    age: null,
+//                    color: null
+                }
+                }
+//                el: '#app',
+//                data: {
+//                  message: 'Hello Vue!'
+//                }
+            
+            var vue = new Vue(app_spec);
+            
+            $.get("servlet", function(response) {
+                vue.earthquakes = response;
+//                vue.name = response.name;
+//                vue.age = response.age;
+//                vue.color = response.favoriteColor;
+            });
+        </script>
+        
     </body>
 </html>

@@ -7,6 +7,8 @@ package com.stockcharts.earthquake.servlet;
 
 import java.sql.*;
 import java.util.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -25,18 +27,21 @@ public class Main {
             e.printStackTrace();
             return;
         }
+        
+        List<Earthquake> earthquakes = getEarthquakes();
+        for (Earthquake earthquake : earthquakes) {
+            JSONArray ja = new JSONArray();
+            ja.put(new JSONObject(earthquake));
+            System.out.println(earthquake);
+        }
+    }
+    private static List<Earthquake> getEarthquakes() {
         String query = "SELECT * FROM InternDB.Earthquakes WHERE magnitude > 5";
-        try (Connection conn = DriverManager.getConnection(DATABASE_URL)) {
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
+        List<Earthquake> earthquakes = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DATABASE_URL); 
+            PreparedStatement stmt = conn.prepareStatement(query)) {
             
             ResultSet rs = stmt.executeQuery();
-//            int numColumns = rs.getMetaData().getColumnCount();
-//            System.out.println(numColumns);
-//            for (int i = 1; i <= numColumns; i++) {
-//                System.out.println(rs.getMetaData().getColumnName(i));
-//            }
-            List<Earthquake> earthquakes = new ArrayList<>();
             
             while (rs.next()) {
                 String id = rs.getString("id");
@@ -54,9 +59,9 @@ public class Main {
                         .withTime(time);
                 earthquakes.add(newQuake);
             }
-            System.out.println(earthquakes.get(1));
         } catch (SQLException e) {
             System.out.println("ERROR querying database: " + e);
         }
+        return earthquakes;
     }
 }

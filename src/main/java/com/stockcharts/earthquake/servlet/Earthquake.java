@@ -5,6 +5,8 @@
  */
 package com.stockcharts.earthquake.servlet;
 
+import java.util.*;
+
 /**
  *
  * @author kaimcconnell
@@ -69,8 +71,38 @@ public class Earthquake {
         return place;
     }
     
+    @Override
     public String toString() {
-        //System.out.println("[id=" + id + ", " + );
-        return null;
+        //JSONObject jo = new JSONObject()
+        String s = "[id=" + id + ", magnitude=" + magnitude + 
+                ", latitude=" + latitude + ", longitude=" + longitude + ", time=" + time + ", place=" + place + "]";
+        return s;
     }
+    
+    public static Comparator<Earthquake> MAGNITUDE = new Comparator<Earthquake>(){
+        @Override
+        public int compare(Earthquake one, Earthquake two) {
+            return Float.compare(one.magnitude, two.magnitude);
+        }
+    };
+    public static Comparator<Earthquake> Longitude = new Comparator<Earthquake>(){
+        @Override
+        public int compare(Earthquake one, Earthquake two) {
+            return Float.compare(one.longitude, two.longitude);
+        }
+    };
+    public static Comparator<Earthquake> Time = new Comparator<Earthquake>(){
+        @Override
+        public int compare(Earthquake one, Earthquake two) {
+            return Float.compare(one.time, two.time);
+        }
+    };
+    public static Comparator<Earthquake> Latitude = new Comparator<Earthquake>(){
+        @Override
+        public int compare(Earthquake one, Earthquake two) {
+            return Float.compare(one.latitude, two.latitude);
+        }
+    };
+    
+    
 }
