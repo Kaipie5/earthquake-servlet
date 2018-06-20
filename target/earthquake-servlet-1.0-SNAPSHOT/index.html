@@ -6,41 +6,102 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <!-- development version, includes helpful console warnings -->
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        
+         <!-- Maps API KEY AIzaSyDnUM4ZqWUX1-sF1tuiGtMb84u3UxZTIv8 -->
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDnUM4ZqWUX1-sF1tuiGtMb84u3UxZTIv8"></script>
+        
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        <style>
+            #map {
+                height : 500px;
+                width : 500px;
+            }
+            
+        </style>
     </head>
     <body>
         <h1>Hello World!</h1>
         
-        <div id="app">
-            {{message}}
-            <div>{{ earthquakes }}</div>
-        </div>
-
+        <div id="map"></div>
+        
+        <table id="app">
+            <tr>
+                <th>id</th>
+                <th>magnitude</th>
+                <th>longitude</th>
+                <th>latitude</th>
+                <th>time</th>
+                <th>place</th>
+            </tr>
+            <tr v-for="earthquake in earthquakes" v-on:click="setCoordinates(earthquake)">
+                <td> {{ earthquake.id }} </td>
+                <td> {{ earthquake.magnitude }} </td>
+                <td> {{ earthquake.longitude }} </td>
+                <td> {{ earthquake.latitude }} </td>
+                <td> {{ earthquake.time }} </td>
+                <td> {{ earthquake.place }} </td> 
+            </tr>
+            
+        </table>
+        
+        
+        
+        
+        
+        
         <script>
-            var app_spec = {
-                el : "#app",
-                data : {
-                    message : 'EARTHQUAKES!',
-                    earthquakes : null
-//                    name : null,
-//                    age: null,
-//                    color: null
-                }
-                }
-//                el: '#app',
-//                data: {
-//                  message: 'Hello Vue!'
-//                }
+
             
-            var vue = new Vue(app_spec);
-            
-            $.get("servlet", function(response) {
-                vue.earthquakes = response;
-//                vue.name = response.name;
-//                vue.age = response.age;
-//                vue.color = response.favoriteColor;
+                
+            var app = new Vue({
+              el: '#app',
+              data: {
+                earthquakes : [],
+              },
+              
+              watch : {
+                  earthquakes : function() {
+                      this.setCoordinates(this.earthquakes[0]);
+                  }
+              },
+              
+              methods: {
+                  logCoordinates : function(earthquake) {
+                      console.log(earthquake.latitude + " " + earthquake.longitude);
+                  },
+                  setCoordinates : function(earthquake) {
+                        var coordinates = {
+                            lat : earthquake.latitude,
+                            lng : earthquake.longitude
+                        };
+                      
+                      var map_spec = {
+                            center : coordinates,
+                            mapTypeId : 'terrain',
+                            zoom : 7
+                      };
+                      var map = new google.maps.Map(document.getElementById('map'), map_spec);
+                      
+                      var marker_spec = {
+                            position : coordinates,
+                            map : map
+                      };
+                      var marker = new google.maps.Marker(marker_spec);
+                  }
+              }
             });
+                        
+            $.get("servlet", function(response) {
+                app.earthquakes = response;
+                console.log(app.earthquakes);
+            });
+            
+
+            
+          
         </script>
+        
         
     </body>
 </html>

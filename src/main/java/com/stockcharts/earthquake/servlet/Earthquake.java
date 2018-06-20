@@ -1,17 +1,17 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.stockcharts.earthquake.servlet;
 
 import java.util.*;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author kaimcconnell
  */
 public class Earthquake {
+    
+    private static Logger logger = Logger.getLogger(EarthquakeDAO.class.getName());
+    
     private String id;
     private float magnitude;
     private float latitude;
@@ -79,9 +79,10 @@ public class Earthquake {
         return s;
     }
     
-    public static Comparator<Earthquake> MAGNITUDE = new Comparator<Earthquake>(){
+    public static Comparator<Earthquake> Magnitude = new Comparator<Earthquake>(){
         @Override
         public int compare(Earthquake one, Earthquake two) {
+            logger.debug("MAGNITUDE COMPARER ENTERED");
             return Float.compare(one.magnitude, two.magnitude);
         }
     };
@@ -94,6 +95,7 @@ public class Earthquake {
     public static Comparator<Earthquake> Time = new Comparator<Earthquake>(){
         @Override
         public int compare(Earthquake one, Earthquake two) {
+            logger.debug("TIME COMPARER ENTERED");
             return Float.compare(one.time, two.time);
         }
     };

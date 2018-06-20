@@ -1,23 +1,19 @@
 package com.stockcharts.earthquake.servlet;
 
-import static com.stockcharts.earthquake.servlet.Main.DATABASE_URL;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 /**
  *
@@ -38,14 +34,15 @@ public class EarthquakesServlet extends HttpServlet {
         logger.warn("           sample-servlet : init()");
         logger.warn("==================================================");
         
-        
+        logger.warn("Getting DB DRIVER Class...");
         try {
             Class.forName(DB_DRIVER_CLASS);
         }catch (ClassNotFoundException e){
-            logger.fatal("DRIVER CLASS NOT FOUND");
-            e.printStackTrace();
-            return;
+            logger.fatal("DRIVER CLASS NOT FOUND", e);
+            throw new UnavailableException("Servlet Unavailable Failed To Get DB Driver Class");
         }
+        logger.warn("...DB Driver Class Found");
+        
         logger.warn("==================================================");
         logger.warn("       sample-servlet : init() - COMPLETE");
         logger.warn("==================================================");
@@ -65,24 +62,58 @@ public class EarthquakesServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         
-        String query = "SELECT * FROM InternDB.Earthquakes WHERE magnitude > 5";
-        List<Earthquake> earthquakes = getEarthquakes(query);
-        JSONArray ja = new JSONArray();
-        for (Earthquake earthquake : earthquakes) {
-            ja.put(new JSONObject(earthquake));
-        }  
-        logger.info(ja.toString());
+        //String query = "SELECT * FROM InternDB.Earthquakes WHERE magnitude > 5";
+        //String query = request.getQueryString();
+        
+        List<Earthquake> earthquakes = new ArrayList<>();
+        try {
+            earthquakes = EarthquakeDAO.getAllEarthquakes();
+        } catch (SQLException exz) {
+            logger.error("Earthquakes Get all Earthquakes Error");
+        }
+        
+        String queryVal = request.getParameter("sort");
+        
+        if (queryVal == null) {
+            queryVal = "noSort";
+        }
+        switch (queryVal) {
+            case "time" :
+                logger.debug("TIME SORT");
+                Collections.sort(earthquakes, Earthquake.Time);
+                break;
+//            case "magnitude" :
+//                logger.debug("MAGNITUDE SORT");
+//                Collections.sort(earthquakes, Earthquake.Magnitude);
+//                break;
+            default :
+                logger.debug("NO SORT");
+                break;
+        }
+        
+        JSONArray ja = new JSONArray(earthquakes);
+        
+        
+        
+        
+        logger.debug("Trying to write response to client...");
         try (PrintWriter out = response.getWriter()) {
             
+            response.setHeader("Connection", "close");
             response.setContentType("application/json");
+            
+            //logger.debug("ARRAY WRITTEN: " + ja.toString());
             
             out.print(ja.toString());
             
             out.flush();
             
         } catch (IOException e) {
-            logger.error("ERROR IN DOGET");
+            logger.error("ERROR Writing Response To Client", e);
         }
+        logger.debug("...Response written to client");
+        
+        
     }
 
     @Override
@@ -90,39 +121,7 @@ public class EarthquakesServlet extends HttpServlet {
         
     }
     
-    private List<Earthquake> getEarthquakes(String query) {
-        
-        logger.info("getEarthquakes Called");
-        List<Earthquake> earthquakes = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(DATABASE_URL); 
-            PreparedStatement stmt = conn.prepareStatement(query)) {
-            
-            logger.info("Connection To Database Established");
-            
-            ResultSet rs = stmt.executeQuery();
-            
-            while (rs.next()) {
-                String id = rs.getString("id");
-                float magnitude = rs.getFloat("magnitude");
-                float latitude = rs.getFloat("latitude");
-                float longitude = rs.getFloat("longitude");
-                long time = rs.getLong("time");
-                String place = rs.getString("place");
-                Earthquake newQuake = new Earthquake()
-                        .withID(id)
-                        .withLatitude(latitude)
-                        .withLongitude(longitude)
-                        .withMagnitude(magnitude)
-                        .withPlace(place)
-                        .withTime(time);
-                earthquakes.add(newQuake);
-                logger.info("Added " + newQuake.getId().toString());
-            }
-        } catch (SQLException e) {
-            logger.info("ERROR querying database: " + e);
-        }
-        return earthquakes;
-    }
+    
 
 }
 
