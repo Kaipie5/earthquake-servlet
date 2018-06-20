@@ -82,10 +82,10 @@ public class EarthquakesServlet extends HttpServlet {
                 logger.debug("TIME SORT");
                 Collections.sort(earthquakes, Earthquake.Time);
                 break;
-//            case "magnitude" :
-//                logger.debug("MAGNITUDE SORT");
-//                Collections.sort(earthquakes, Earthquake.Magnitude);
-//                break;
+            case "magnitude" :
+                logger.debug("MAGNITUDE SORT");
+                Collections.sort(earthquakes, Earthquake.Magnitude);
+                break;
             default :
                 logger.debug("NO SORT");
                 break;
